@@ -1,0 +1,275 @@
+import java.util.Scanner;
+import java.text.ParseException;
+import java.text.SimpleDateFormat; 
+import java.util.Date;
+class Seat{
+    int age;
+    String name;
+    int available;
+    Seat(){
+        available=1;               //flag variable to indicate whether a seat is available or not.
+    }
+}
+class Bus {
+	String busNo;
+	int t1,t2;                      //t1 stores time of departre, t2 stores time of reach.
+    double fare;                    //holds decided fare of each bus.
+	static int capacity=30;         //capacity is a static variable which holds value of number of vacancies.
+    String src,dst;
+    Date date;
+    Seat seat[];                   //creating array of objects of seat array.
+    static int z=0;                //for updating seats booked after each set of reservation.
+    static int j=0;                //to update the seat number, after each set of reservation.
+    double finaltrans=0;           //to keep track of daily transaction.
+	
+	Bus(String no,int t1,int t2,int cap,String src,String dst,double fare){
+		this.busNo=no;
+		this.t1=t1;
+        this.t2=t2;
+        this.src=src;
+        this.dst=dst;
+        this.fare=fare;
+        seat=new Seat[30];
+        for(int i=0;i<30;i++){                         //creating all 30 seat object instances, to avoid null-pointer exception.
+            seat[i]=new Seat();
+        }
+	}
+	
+	public void displayBusInfo(){                     //diaplays each bus details.
+        System.out.println();  
+		System.out.println("Bus No:" +busNo);
+        System.out.println("Time of departure:" +t1+":00 hrs");
+        System.out.println("Estimated time of reach:" +t2+":00 hrs");
+        System.out.println("Available Capacity: "+capacity);
+        System.out.println("Boarding point: "+src);
+        System.out.println("Destination: "+dst);
+        System.out.println();
+	}
+    public void booking(){                          //function for both booking and cancellation.
+        Scanner sc=new Scanner(System.in);
+        double tot_fare=0;                          //to hold total fare after each transaction.
+        System.out.println("Enter date dd-mm-yyyy");                                         
+		String dateInput = sc.next();
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy"); //Converts to date format, when user enters date in format dd-MM-yyyy
+		
+		try {
+			date = dateFormat.parse(dateInput);            //Exception handling block for date input, which raises parse Exception.
+		} catch (ParseException e) {
+            System.out.println(e);
+		}
+
+        System.out.print("Enter No. of tickets to be booked:");
+        int n=sc.nextInt();
+        if(n<=capacity){                                   //Ensures number of seats available are more than tickets to be booked.
+            String name1;
+            int age1;
+            for(int i=0;i<n;i++){
+                //seat[i]=new Seat();
+                System.out.print("Name of passenger "+(i+1)+":");
+                name1=sc.next();
+                System.out.print("Age of passenger:");
+                age1=sc.nextInt();
+                //int j=0;
+                if(seat[j].available==1){                      //books a seat only if its available.
+                seat[j].name=name1;
+                seat[j].available=0;                          //makes a seat unavailable as soon as it is booked.
+                seat[j].age=age1;
+                j++;
+                }
+                    
+                if(age1<3){
+                    tot_fare=tot_fare+0;                      //fare calcuation.
+                }
+                else if((age1<6)||(age1>60)){
+                    tot_fare=tot_fare+fare*0.6;
+                }
+                else{
+                    tot_fare=tot_fare+fare;
+                }
+            }
+            capacity=capacity-n;                             //updates capacity of bus, by subtracting the number of seats booked.
+            
+            System.out.println("Displaying Booking Details:");                //Displaying final bill.
+            System.out.println("******************************************");
+            System.out.println("                  BILL                  ");
+            System.out.println();
+            System.out.println("Date of travel:"+date);
+            System.out.println();
+            System.out.println("Boarding point:"+src);
+            System.out.println("Destination:"+dst);
+            System.out.println();
+            System.out.println("Time of departure:" +t1+":00 hrs");
+            System.out.println("Estimated time of reach:" +t2+":00 hrs");
+            System.out.println();
+            System.out.println("Base fare:"+tot_fare);
+            double tax=18.00/100.00*tot_fare;
+            System.out.println("Tax: "+tax);                                  //Adding tax component.
+            System.out.println("Total Fare: "+(tot_fare+tax));
+            System.out.println();
+            System.out.println("Passenger Details:");
+            System.out.println();
+            for(int i=z;i<n+z;i++){
+                System.out.println("Name of passenger:"+seat[i].name);
+                System.out.println("Age of passenger:"+seat[i].age);
+                System.out.println("Seat No.: "+(i+1));
+                System.out.println();
+                
+            }
+            z=z+n;                                                           //to keep track of seat booked after each reservation.
+            finaltrans=finaltrans+tot_fare;                                  //updating daily transaction after each transaction.
+            System.out.println("_____________________________________________");
+        }
+    }
+    public void cancel(){                                                   //cancellation of ticket.
+        Scanner sc=new Scanner(System.in);
+        System.out.println("Enter name of passenger to be cancelled");
+        String n1=sc.next();
+        int flag=0;
+        for(int i=0;i<30;i++){
+            if((seat[i].name).equals(n1)){                                   //cancels when name is found.
+                flag=1;
+                seat[i].available=1;                                         //makes particular seat available for next set of reservations.
+                break;
+            }
+        }
+        if(flag==0){
+            System.out.println("Passenger not found");
+        }
+        else{
+            System.out.println("Passenger name "+n1+" ticket successfully cancelled");
+            capacity=capacity+1;                                         //increases bus capacity by 1.
+        }
+    }                     
+    public void finalfunc(){                                            //function to display final daily transaction.
+        System.out.println("Final Report Generation: "+finaltrans);
+    }
+}
+
+public class BusDemo {
+
+	public static void main(String[] args) {
+        Scanner sc=new Scanner(System.in);
+        int s1;
+        System.out.println("__________________________________________________");
+        System.out.println();
+        System.out.println("             Welcome to NAVAK TRAVELS             ");
+        System.out.println("                    Bus Details                   ");
+		Bus mu=new Bus("KA 07 EQ 4335",7,8,30,"Manipal","Udupi",10);             //bus1
+        Bus mman=new Bus("KA 23 MQ 9324",11,13,30,"Manipal","Mangalore",100);    //bus2
+        Bus manm=new Bus("KA 31 EQ 2934",15,17,30,"Mangalore","Manipal",100);    //bus3
+        Bus um=new Bus("KA 10 EH 3545",18,19,30,"Udupi","Manipal",10);           //bus 4
+        do{
+        System.out.println();
+        System.out.println("1. Manipal -> Udupi");
+        System.out.println("2. Manipal -> Mangalore"); 
+        System.out.println("3. Mangalore -> Manipal");
+        System.out.println("4. Udupi -> Manipal");
+        System.out.println("0 to exit");
+        System.out.println();
+        System.out.println("___________________________________________________");
+        System.out.println("Enter input:");
+        s1=sc.nextInt();
+        switch(s1){
+            case 1:                                               //case bus1
+            System.out.println("______________________________________________________________________");
+            System.out.println();
+            System.out.println("Fare: 10Rs.");
+            System.out.println("40% fare relaxation for senior citizens and Children of (3-6 years)");
+            System.out.println("NO fare for infants/children under 3 years");
+            System.out.println("Available Bus:");
+            mu.displayBusInfo();
+            System.out.println("Press 1 to book ticket,2 to cancel,0 to exit");
+            System.out.println("______________________________________________________________________");
+            int ch1=sc.nextInt();
+            if(ch1==1){
+                mu.booking();
+
+            }
+            else if(ch1==2){
+                mu.cancel();
+            }
+            else{
+                System.out.println("Exiting...");
+            }
+            break;
+            case 2:                                               //case bus2                                                 
+            System.out.println("______________________________________________________________________");
+            System.out.println();
+            System.out.println("Fare: 100Rs.");
+            System.out.println("40% fare relaxation for senior citizens and Children of (3-6 years)");
+            System.out.println("NO fare for infants/children under 3 years");
+            System.out.println("Available Bus:");
+            mman.displayBusInfo();
+            System.out.println("Press 1 to book ticket,2 to cancel,0 to exit");
+            System.out.println("______________________________________________________________________");
+            ch1=sc.nextInt();
+            if(ch1==1){
+                mman.booking();
+            }
+            else if(ch1==2){
+                mman.cancel();
+            }
+            else{
+                System.out.println("Exiting...");
+            }
+            break;
+            case 3:                                               //case bus3
+            System.out.println("______________________________________________________________________");
+            System.out.println();
+            System.out.println("Fare: 100Rs.");
+            System.out.println("40% fare relaxation for senior citizens and Children of (3-6 years)");
+            System.out.println("NO fare for infants/children under 3 years");
+            System.out.println("Available Bus:");
+            manm.displayBusInfo();
+            System.out.println("Press 1 to book ticket,2 to cancel,0 to exit");
+            System.out.println("______________________________________________________________________");
+            ch1=sc.nextInt();
+            if(ch1==1){
+                manm.booking();
+            }
+            else if(ch1==2){
+                manm.cancel();
+            }
+            else{
+                System.out.println("Exiting...");
+            }
+            break;
+            case 4:                                               //case bus4
+            System.out.println("______________________________________________________________________");
+            System.out.println();
+            System.out.println("Fare: 100Rs.");
+            System.out.println("40% fare relaxation for senior citizens and Children of (3-6 years)");
+            System.out.println("NO fare for infants/children under 3 years");
+            System.out.println("Available Bus:");
+            um.displayBusInfo();
+            System.out.println("Press 1 to book ticket,2 to cancel,0 to exit");
+            System.out.println("______________________________________________________________________");
+            ch1=sc.nextInt();
+            if(ch1==1){
+                um.booking();
+            }
+            else if(ch1==2){
+                um.cancel();
+            }
+            else{
+                System.out.println("Exiting...");
+            }
+            break;
+            case 0:                                               //case exit
+            System.out.println("Thankyou, We hope you have a safe journey with NAVAK travels.");
+            break;
+            default:                                               //case invalid choice
+            System.out.println("Invalid choice, please enter valid input");
+        }
+        }while(s1!=0);                                           //diaplays final aily transaction/report of all 4 buses.
+        System.out.println("Manipal to Udupi: ");
+        mu.finalfunc();
+        System.out.println("Manipal to Mangalore: ");
+        mman.finalfunc();
+        System.out.println("MAngalore to Manipal: ");
+        manm.finalfunc();
+        System.out.println("Udupi to Manipal: ");
+        um.finalfunc();
+	}
+}
